@@ -1,158 +1,132 @@
-// import loadRecipe from "./model.js";
-import * as model from "./model.js"
-import renderViews from "./views/renderViews.js";
-import loadSearchView from "./views/loadSearchView.js";
-import {MODAL_CLOSE_SEC} from "./config";
-import renderResults from "./views/renderResults.js";
-import paginationView from "./views/paginationView.js";
-import bookmarkView from "./views/BookmarkView.js";
-import addRecipeView from "./views/addRecipeView.js";
-//import "core.js/stable";
-import "regenerator-runtime/runtime";
-const recipeContainer = document.querySelector('.recipe');
+import * as model from './model.js';
+import { MODAL_CLOSE_SEC } from './config.js';
+import recipeView from './views/recipeView.js';
+import searchView from './views/searchView.js';
+import resultsView from './views/resultsView.js';
+import paginationView from './views/paginationView.js';
+import bookmarksView from './views/bookmarksView.js';
+import addRecipeView from './views/addRecipeView.js';
 
+// Polyfilling
+import 'core-js/stable';
+import 'regenerator-runtime/runtime';
 
-
-// https://forkify-api.herokuapp.com/v2
-// if(module.hot){
-//   module.hot.accept()
-// }
-const requestApi=async function(){
+const controlRecipes = async function () {
   try {
+    const id = window.location.hash.slice(1);
 
-    const id=window.location.hash.slice(1);
-    if(!id)return;
-     renderViews.renderSpinner();
+    if (!id) return;
+    // Render spinner while fetching data
+    recipeView.renderSpinner();
 
-    renderResults.update(model.getPageData());
-    bookmarkView.update(model.state.bookmarks)
+    // 1) Mark selected search result & selected bookmark
+    resultsView.update(model.getSearchResultsPage());
+    bookmarksView.update(model.state.bookmarks);
+
+    // 2) Loading Recipe
     await model.loadRecipe(id);
-    //rendering recipe
-    renderViews.render(model.state.recipe);
-    
-    console.log(model.state);
-    
+
+    // 3) Rendering Recipe
+    recipeView.render(model.state.recipe);
   } catch (err) {
-    renderViews.renderError(    )
-    console.error(err.status+" "+err.message);
+    recipeView.renderError();
+    console.error(err);
   }
-}
+};
 
+const controlSearchResults = async function () {
+  try {
+    resultsView.renderSpinner();
 
-const controlSearchResults= async function(){
-  // loadSearchView.addrendersearch(
-    try{
-      renderResults.renderSpinner();
-      //get search query
-      const query=loadSearchView.getQuery();
-      if(!query)return;
-      
-      //load search results
-      await model.loadSearch(query);
-     
-      renderResults.render(model.getPageData())
-      //render results
+    // 1) Get search query
+    const query = searchView.getQuery();
+    if (!query) return;
 
-      //render paginationView
-     paginationView.render(model.state.search);
-     
-    }catch(err){
-      console.log(err);
-    }
+    // 2) Load search results
+    await model.loadSearchResults(query);
 
-}
-const renderServings=function (newServings){
-  model.addRenderServings(newServings)
-  renderViews.update(model.state.recipe);
+    // 3) Render results
+    resultsView.render(model.getSearchResultsPage());
 
-}
+    // 4) Render pagination buttons
+    paginationView.render(model.state.search);
+  } catch (err) {
+    console.log(err);
+  }
+};
 
-const renderPaginationPerPage=function(perPage){
-  console.log(perPage);
-//   //btn render results
-//   console.log(model.state.search.results);
-  renderResults.render(model.getPageData(perPage))
+const controlPagination = function (goToPage) {
+  // 1) Render New results
+  resultsView.render(model.getSearchResultsPage(goToPage));
 
-  //btn render paginationView
- paginationView.render(model.state.search);
- 
-}
-const addControllBookmark=function(handler){
-      //add or remove bookmark
-      if(!model.state.recipe.bookmarked)model.addBookmark(model.state.recipe);
-      else model.deleteBoobmark(model.state.recipe.id); 
+  // 2) Render New pagination buttons
+  paginationView.render(model.state.search);
+};
 
-      //update recipeview
-      renderViews.update(model.state.recipe);
-      //render bookmarks
-      bookmarkView.render(model.state.bookmarks);
-    }
+const controlServings = function (newServings) {
+  // Update recipe servings
+  model.updateServings(newServings);
 
-    const controlBookmarks=function(){
-      bookmarkView.render(model.state.bookmarks);
-} 
-const controlAddRecipe=async function(newRecipe){
-  try{
+  // Update recipe view
+  recipeView.update(model.state.recipe);
+};
 
-    //show loading spinner
-    // addRecipeView.renderSpinner();
-      //uplaod the new recipe data
-        await model.uplaodRecipe(newRecipe);
-        console.log(model.state.recipe);
+const controlAddBookmark = function () {
+  // 1) ( Add - Remove ) bookmark
+  if (!model.state.recipe.bookmarked) model.addBookmark(model.state.recipe);
+  else model.removeBookmark(model.state.recipe.id);
 
-        //render recipe
-        renderViews.render(model.state.recipe);
+  // 2) Update recipe view
+  recipeView.update(model.state.recipe);
 
-      //seccess message
-        addRecipeView.renderMessage();
+  // 3) Render bookmarks
+  bookmarksView.render(model.state.bookmarks);
+};
 
+const controlBookmarks = function () {
+  bookmarksView.render(model.state.bookmarks);
+};
 
-        //render the bookmark view
-        bookmarkView.render(model.state.bookmarks)
+const controlAddRecipe = async function (newRecipe) {
+  try {
+    // Load spinner
+    addRecipeView.renderSpinner();
 
-        //change ID in URl
+    // Upload new recipe data
+    await model.uploadRecipe(newRecipe);
 
-        window.history.pushState(null,"",`#${model.state.recipe.id}`)
-      //close form window
-        setTimeout(function(){
-          addRecipeView.toggleWindow();
-        },MODAL_CLOSE_SEC * 1000);  
+    // Render recipe
+    recipeView.render(model.state.recipe);
 
-  }catch(err){
-    console.error('💥', err);
+    // Success Message
+    addRecipeView.renderMessage();
+
+    // Render bookmark view
+    bookmarksView.render(model.state.bookmarks);
+
+    // Change ID in URL
+    window.history.pushState(null, '', `#${model.state.recipe.id}`);
+
+    // Close form window
+    setTimeout(function () {
+      addRecipeView.toggleWindow();
+    }, MODAL_CLOSE_SEC * 1000);
+  } catch (err) {
+    console.error(err);
     addRecipeView.renderError(err.message);
   }
+};
 
-}
+// Runs at first so that the publisher notify the subscribersw
+const init = function () {
+  bookmarksView.addHandlerRender(controlBookmarks);
 
-const init =function(){
-  //function  to uplaod data
-
-  bookmarkView.addHandlerRender(controlBookmarks);
-  renderViews.addHendlerRender(requestApi);
-  renderViews.addhandlerRenderServings(renderServings);
-  renderViews.addHandleraddBookmark(addControllBookmark);
-  loadSearchView.addRenderSearch(controlSearchResults);
-  paginationView.addHandlerClick(renderPaginationPerPage);
+  // pub/sub pattern
+  recipeView.addHandlerRender(controlRecipes);
+  recipeView.addHandlerUpdateServings(controlServings);
+  recipeView.addHandlerAddBookmark(controlAddBookmark);
+  searchView.addHandlerSearch(controlSearchResults);
+  paginationView.addHandlerClick(controlPagination);
   addRecipeView.addHandlerUpload(controlAddRecipe);
-}
+};
 init();
-
-
-
-
-
-
-// requestApi();
-// ["hashchange","load"].forEach(ev=> windows.addEventListener(ev,requestApi));
-
-
-///////////////////////////////////////
-// visionaryprofit.com
-//tikka  tawari ethereum coin 
-//the adoption curve graph (innovation,early adopters,early majority,late Majority, Laggards)
-//buy as soonas possible
-//bitcon close to etherem (final countdown buy list: Two tiny Cryptos to own now)
-//(the Final countDown: the ultime backdoor profit plays)
-//(the bitcoin boost) how to supercharge your gains with the 1170 account
-//palm beach letter

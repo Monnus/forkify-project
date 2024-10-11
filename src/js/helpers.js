@@ -1,31 +1,16 @@
-import {TIMEOUT_NUM} from "./config.js";
+import { async } from 'regenerator-runtime';
+import { TIMEOUT_SEC } from './config';
 
+// to make a time-limit so that fetching doesn't go forever
 const timeout = function (s) {
-    return new Promise(function (_, reject) {
-      setTimeout(function () {
-        reject(new Error(`Request took too long! Timeout after ${s} second`));
-      }, s * 1000);
-    });
-  };
-  
+  // returning a promise that will be rejected after "s" seconds
+  return new Promise(function (_, reject) {
+    setTimeout(function () {
+      reject(new Error(`Request took too long! Timeout after ${s} second`));
+    }, s * 1000);
+  });
+};
 
-// export const getJson=async function(url){
-//     try {
-//        // const res=await fetch(url);
-//         const res=await Promise.race([fetch(url),timeout(TIMEOUT_NUM)]);
-//       //  console.log(res);
-//         const data=await res.json();
-//         console.log(data);
-//         if(!res.ok){
-//             throw new Error(`${data.status} ${data.message}`)
-//                 }
-
-//                 return data;
-//     } catch (error) {
-//        // console.log(error);
-//         throw error;
-// }
-// }
 export const AJAX = async function (url, uploadData = undefined) {
   try {
     const fetchPro = uploadData
@@ -38,7 +23,7 @@ export const AJAX = async function (url, uploadData = undefined) {
         })
       : fetch(url);
 
-    const res = await Promise.race([fetchPro, timeout(TIMEOUT_NUM)]);
+    const res = await Promise.race([fetchPro, timeout(TIMEOUT_SEC)]);
     const data = await res.json();
 
     if (!res.ok) throw new Error(`${data.message} (${res.status})`);
@@ -47,37 +32,3 @@ export const AJAX = async function (url, uploadData = undefined) {
     throw err;
   }
 };
- 
-/*
-export const sendJson=async function(url,uploadData){
-  try {
-     const res=await fetch(url);
-    const fetchPro = fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(uploadData),
-    });
-      const res=await Promise.race([ fetch(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(uploadData),
-      }),timeout(TIMEOUT_NUM)]);
-    //  console.log(res);
-      const data=await res.json();
-      console.log(data);
-      if(!res.ok){
-          throw new Error(`${data.status} ${data.message}`)
-              }
-
-              return data;
-  } catch (error) {
-     // console.log(error);
-      throw error;
-}
-}
-// ,{method:"POST",headers:{"Content-Type":"application/json",},body:JSON.stringify(uploadData)}
-*/
