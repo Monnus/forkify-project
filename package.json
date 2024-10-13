@@ -9,14 +9,22 @@
     "fractional": "^1.0.0",
     "regenerator-runtime": "^0.13.9"
   },
-  "devDependencies": {
-    "@parcel/transformer-sass": "^2.0.1",
-    "parcel": "^2.0.1-beta.1 "
-  },
   "scripts": {
     "start": "parcel index.html",
     "build": "parcel build index.html --dist-dir ./dist"
   },
-  "author": "",
-  "license": "ISC"
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Monnus/forkify-project"
+  },
+  "devDependencies": {
+    "@parcel/transformer-sass": "^2.8.2",
+    "parcel": "2.8.2 ",
+    "sass": "1.26.10"
+  },
+  "author": "Maundrian Velsket",
+  "license": "ISC",
+  "volta": {
+    "node": "18.17.0"
+  }
 }
