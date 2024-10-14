@@ -5,9 +5,10 @@
   "default": "index.html",
   "type": "module",
   "dependencies": {
+    "core-js": "^3.38.1",
     "core.js": "^0.4.2",
     "fractional": "^1.0.0",
-    "regenerator-runtime": "^0.13.9"
+    "regenerator-runtime": "^0.13.7"
   },
   "scripts": {
     "start": "parcel index.html",
@@ -19,12 +20,9 @@
   },
   "devDependencies": {
     "@parcel/transformer-sass": "^2.8.2",
-    "parcel": "2.8.2 ",
+    "parcel": "^2.8.2",
     "sass": "1.26.10"
   },
   "author": "Maundrian Velsket",
-  "license": "ISC",
-  "volta": {
-    "node": "18.17.0"
-  }
+  "license": "ISC"
 }
