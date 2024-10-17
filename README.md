@@ -14,7 +14,7 @@ Forkify is a recipe web app using the [Forkify API](https://forkify-api.herokuap
 
 - Available search queries : [Queries](https://forkify-api.herokuapp.com/phrases.html)
 
-![Forkify preview](./src/img/preview.png)
+
 
 ### Flowchart
 
@@ -54,8 +54,8 @@ When you return, your bookmarks and personal recipes will still be available for
 
 
 ### How the app should look like
-<img src='./src/img/preview.png' alt='architecture' >
-Please access the demo <a href="forkify-project-nine.vercel.app" target="_blank"> here </a>
+![Forkify preview](./src/img/preview.png)
+Please access the demo <a href="https://forkify-project-nine.vercel.app/" target="_blank"> here </a>
 
 Spacial Thanks to
 [Jonas schmedtmann](https://github.com/jonasschmedtmann)
